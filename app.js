@@ -16,7 +16,7 @@ app.get("/api/users", (req, res) => {
 
 // отримання одного користувача по id
 app.get("/api/users/:id", (req, res) => {
-    let id = req.params.id; // получаем id
+    let id = req.params.id;
     let content = fs.readFileSync("users.json", "utf8");
     let users = JSON.parse(content);
     let user = null;
@@ -40,8 +40,9 @@ app.post("/api/users", jsonParser, (req, res) => {
     if(!req.body) return res.sendStatus(400);
 
     let userName = req.body.name;
+    let surname = req.body.surname;
     let userAge = req.body.age;
-    let user = {name: userName, age: userAge};
+    let user = {name: userName, surname: surname, age: userAge};
 
     let data = fs.readFileSync("users.json", "utf8");
     let users = JSON.parse(data);
@@ -96,6 +97,7 @@ app.put("/api/users", jsonParser,(req, res) => {
 
     let userId = req.body.id;
     let userName = req.body.name;
+    let surname = req.body.surname;
     let userAge = req.body.age;
 
     let data = fs.readFileSync("users.json", "utf8");
@@ -111,6 +113,7 @@ app.put("/api/users", jsonParser,(req, res) => {
     if(user){
         user.age = userAge;
         user.name = userName;
+        user.surname = surname;
         let data = JSON.stringify(users);
         fs.writeFileSync("users.json", data);
         res.send(user);

@@ -15,17 +15,32 @@
             <label for="name">Ім'я:</label>
             <input type="text" class="form-control" name="name" required/>
         </div>
+
+        <div class="form-group">
+            <label for="surname">Прізвище:</label>
+            <input type="text" class="form-control" name="surname" required/>
+        </div>
+
         <div class="form-group">
             <label for="age">Вік:</label>
             <input type="number" class="form-control" name="age" required/>
         </div>
+
         <div class="panel-body">
             <button type="submit" class="btn btn-sm btn-primary">Зберегти</button>
             <a id="reset" class="btn btn-sm btn-primary">Очистити</a>
         </div>
     </form>
     <table class="table table-condensed table-striped table-bordered">
-        <thead><tr><th>Id</th><th>Ім'я</th><th>Вік</th><th></th></tr></thead>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Ім'я</th>
+                <th>Прізвище</th>
+                <th>Вік</th>
+                <th></th>
+            </tr>
+        </thead>
         <tbody>
         </tbody>
     </table>
@@ -50,7 +65,7 @@
         // Отримання користувача по id
         function GetUser(id) {
             $.ajax({
-                url: "/api/users/"+id,
+                url: "/api/users/" + id,
                 type: "GET",
                 contentType: "application/json",
                 success: function (user) {
@@ -58,17 +73,19 @@
                     form.elements["id"].value = user.id;
                     form.elements["name"].value = user.name;
                     form.elements["age"].value = user.age;
+                    form.elements["surname"].value = user.surname;
                 }
             });
         }
         // Добавлення користувача
-        function CreateUser(userName, userAge) {
+        function CreateUser(userName, surname, userAge) {
             $.ajax({
                 url: "api/users",
                 contentType: "application/json",
                 method: "POST",
                 data: JSON.stringify({
                     name: userName,
+                    surname: surname,
                     age: userAge
                 }),
                 success: function (user) {
@@ -78,7 +95,7 @@
             })
         }
         // Редагуванння користувача
-        function EditUser(userId, userName, userAge) {
+        function EditUser(userId, userName, surname,  userAge) {
             $.ajax({
                 url: "api/users",
                 contentType: "application/json",
@@ -86,6 +103,7 @@
                 data: JSON.stringify({
                     id: userId,
                     name: userName,
+                    surname: surname,
                     age: userAge
                 }),
                 success: function (user) {
@@ -116,9 +134,10 @@
         // створення таблиці
         let row = function (user) {
             return "<tr data-rowid='" + user.id + "'><td>" + user.id + "</td>" +
-                "<td>" + user.name + "</td> <td>" + user.age + "</td>" +
-                "<td><a class='editLink' data-id='" + user.id + "'>Изменить</a> | " +
-                "<a class='removeLink' data-id='" + user.id + "'>Удалить</a></td></tr>";
+                "<td>" + user.name + "</td> " + "<td>" + user.surname + "</td>" +
+                "<td>" + user.age + "</td>" +
+                "<td><a class='editLink' data-id='" + user.id + "'>Змінити</a> | " +
+                "<a class='removeLink' data-id='" + user.id + "'>Видалити</a></td></tr>";
         };
 
         // скидання значення форми
@@ -132,11 +151,12 @@
             e.preventDefault();
             let id = this.elements["id"].value;
             let name = this.elements["name"].value;
+            let surname = this.elements["surname"].value;
             let age = this.elements["age"].value;
             if (id == 0) {
-                CreateUser(name, age);
+                CreateUser(name, surname, age);
             } else {
-                EditUser(id, name, age);
+                EditUser(id, name, surname, age);
             }
         });
 
