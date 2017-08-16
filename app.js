@@ -9,7 +9,7 @@ app.use(express.static(__dirname + "/public"));
 
 // отримання списку даних
 app.get("/api/users", (req, res) => {
-    let content = fs.readFileSync("users.json", "utf8");
+    let content = fs.readFileSync("users/users.json", "utf8");
     let users = JSON.parse(content);
     res.send(users);
 });
@@ -17,7 +17,7 @@ app.get("/api/users", (req, res) => {
 // отримання одного користувача по id
 app.get("/api/users/:id", (req, res) => {
     let id = req.params.id;
-    let content = fs.readFileSync("users.json", "utf8");
+    let content = fs.readFileSync("users/users.json", "utf8");
     let users = JSON.parse(content);
     let user = null;
     // знаходимо користувача в масиві по id
@@ -37,18 +37,20 @@ app.get("/api/users/:id", (req, res) => {
 
 // отримання надісланих даних
 app.post("/api/users", jsonParser, (req, res) => {
-    if(!req.body) return res.sendStatus(400);
+    if(!req.body || isEmptyObj(req.body) ) {
+        return res.sendStatus(400);
+    }
 
     let userName = req.body.name;
     let surname = req.body.surname;
     let userAge = req.body.age;
     let user = {name: userName, surname: surname, age: userAge};
 
-    let data = fs.readFileSync("users.json", "utf8");
+    let data = fs.readFileSync("users/users.json", "utf8");
     let users = JSON.parse(data);
 
     // Знаходимо максимальний id
-    let id = Math.max.apply(Math,users.map(function(o){return o.id;}));
+    let id = Math.max.apply(Math,users.map(function(elem){return elem.id;}));
 
     // збільшуємо його на 1
     if(id == -Infinity){
@@ -60,14 +62,14 @@ app.post("/api/users", jsonParser, (req, res) => {
     users.push(user);
     data = JSON.stringify(users);
     // перезаписуєм файл з користувачами
-    fs.writeFileSync("users.json", data);
+    fs.writeFileSync("users/users.json", data);
     res.send(user);
 });
 
 // видаляємо користувача по id
 app.delete("/api/users/:id", (req, res) => {
     let id = req.params.id;
-    let data = fs.readFileSync("users.json", "utf8");
+    let data = fs.readFileSync("users/users.json", "utf8");
     let users = JSON.parse(data);
     let index = -1;
     // знаходимо індекс користувача в масиві
@@ -82,7 +84,7 @@ app.delete("/api/users/:id", (req, res) => {
         // видаляємо користувача із масиву по id
         let user = users.splice(index, 1)[0];
         let data = JSON.stringify(users);
-        fs.writeFileSync("users.json", data);
+        fs.writeFileSync("users/users.json", data);
         // відправляємо видаленого користувача
         res.send(user);
     }  else {
@@ -93,14 +95,16 @@ app.delete("/api/users/:id", (req, res) => {
 // змінення даних користувача
 app.put("/api/users", jsonParser,(req, res) => {
 
-    if(!req.body) return res.sendStatus(400);
+    if(!req.body || isEmptyObj(req.body) ) {
+        return res.sendStatus(400);
+    }
 
     let userId = req.body.id;
     let userName = req.body.name;
     let surname = req.body.surname;
     let userAge = req.body.age;
 
-    let data = fs.readFileSync("users.json", "utf8");
+    let data = fs.readFileSync("users/users.json", "utf8");
     let users = JSON.parse(data);
     let user;
     for(let i = 0; i < users.length; i++){
@@ -115,11 +119,20 @@ app.put("/api/users", jsonParser,(req, res) => {
         user.name = userName;
         user.surname = surname;
         let data = JSON.stringify(users);
-        fs.writeFileSync("users.json", data);
+        fs.writeFileSync("users/users.json", data);
         res.send(user);
     } else {
         res.status(404).send(user);
     }
 });
 
+function isEmptyObj(obj) {
+    for(let key in obj) {
+        return false;
+    }
+    return true;
+}
+
 app.listen(3000, () => { console.log("Server start - localhost:3000"); });
+
+module.exports.app = app;
